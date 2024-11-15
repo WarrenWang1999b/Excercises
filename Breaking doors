@@ -1,0 +1,86 @@
+import time
+import random
+
+# Game Start
+print("Welcome to the Breaking door Game!")
+print("Your goal is to break through different doors and collect 300 points.")
+print("Press 'Space' to attack, 'A' to move left, 'D' to move right, and 'Q' to exit the game.")
+print("The game start!\n")
+
+# Initialize game variables
+door_types = [
+    ("Wood Door", 50, 50, 10),   # 50% probability, 10 points
+    ("Iron Door", 100, 30, 30),  # 30% probability, 30 points
+    ("Stone Door", 150, 20, 50)  # 20% probability, 50 points
+]
+current_door_name, current_door_hp, _, current_door_points = door_types[0]
+character_attack_power = 10
+character_position = "center"
+points = 0
+stamina = 100
+stamina_cost = 15
+stamina_recovery_rate = 30
+stamina_recovery_delay = 2
+last_attack_time = time.time()
+
+def display_status():
+    print(f"Current Door: {current_door_name} (HP: {current_door_hp})")
+    print(f"Character Position: {character_position}")
+    print(f"Points: {points}")
+    print(f"Stamina: {stamina}/100\n")
+
+# Function to recover stamina
+def recover_stamina():
+    global stamina, last_attack_time
+    if time.time() - last_attack_time >= stamina_recovery_delay:
+        stamina = min(100, stamina + stamina_recovery_rate)
+
+# Function to choose the next door based on probabilities
+def choose_next_door():
+    global current_door_name, current_door_hp, current_door_points
+    probabilities = [door[2] for door in door_types]  # Extract probabilities
+    chosen_index = random.choices(range(len(door_types)), weights=probabilities, k=1)[0]
+    current_door_name, current_door_hp, _, current_door_points = door_types[chosen_index]
+
+# Main game loop
+while points < 300:  # Victory condition: 300 points
+    # Recover stamina if enough time has passed
+    recover_stamina()
+
+    # Display current status
+    display_status()
+
+    # Get player input
+    command = input("Enter command (A/D/Space/Q): ").strip().upper()
+
+    if command == "A":
+        character_position = "left"
+        print("You moved left.\n")
+    elif command == "D":
+        character_position = "right"
+        print("You moved right.\n")
+    elif command == " ":
+        if stamina >= stamina_cost:
+            stamina -= stamina_cost
+            last_attack_time = time.time()  # Update last attack time
+            current_door_hp -= character_attack_power
+            print(f"You attacked the {current_door_name}! It took {character_attack_power} damage. Stamina: {stamina}/100\n")
+            if current_door_hp <= 0:
+                points += current_door_points
+                print(f"The {current_door_name} has been destroyed! You earned {current_door_points} points. Total points: {points}\n")
+                choose_next_door()  # Choose the next door based on probabilities
+            if points >= 300:
+                print("Congratulations! You have collected 300 points and won the game!")
+                break
+        else:
+            print("Not enough stamina to attack!\n")
+    elif command == "Q":
+        print("Exiting the game. Goodbye!")
+        break
+    else:
+        print("Invalid command. Please try again.\n")
+
+    time.sleep(0.5)  # Small delay 
+
+# Game End
+print("Game Over.")
