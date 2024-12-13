@@ -1,0 +1,150 @@
+import datetime
+
+class Inventory:
+    def __init__(self):
+        self.items = []  # List to store unequipped items
+
+    def add_item(self, name, item_type, level, rarity):
+        """Add an item to the inventory."""
+        item = {
+            "name": name,
+            "type": item_type,
+            "level": level,
+            "rarity": rarity,
+            "time_acquired": datetime.datetime.now()
+        }
+        self.items.append(item)
+        print(f"Added {name} to inventory.")
+
+    def sort_items(self, criterion="time"):
+        """Sort items by a given criterion: 'time', 'rarity', 'level', 'type'."""
+        if criterion not in ["time", "rarity", "level", "type"]:
+            print("Invalid sorting criterion. Choose from 'time', 'rarity', 'level', or 'type'.")
+            return
+
+        reverse = True if criterion in ["time", "rarity", "level"] else False
+        self.items.sort(key=lambda x: x[criterion], reverse=reverse)
+        print(f"Items sorted by {criterion}.")
+
+    def display_items(self):
+        """Display all items in the inventory."""
+        if not self.items:
+            print("Inventory is empty.")
+            return
+
+        print("\nInventory Items:")
+        for item in self.items:
+            print(f"- {item['name']} (Type: {item['type']}, Level: {item['level']}, "
+                  f"Rarity: {item['rarity']}, Acquired: {item['time_acquired']})")
+        print("\n")
+
+
+class EquipmentSystem:
+    def __init__(self):
+        # Equipment slots organized by type
+        self.equipment_slots = {
+            "Weapon": None,
+            "Armor": {
+                "Head": None,
+                "Drive": None,
+                "Hands": None,
+                "Waist": None,
+                "Legs": None,
+                "Shoes": None,
+            },
+            "Accessory": {
+                "Necklace": None,
+                "Bracelet": None,
+                "Special Item": None,  # e.g., Philosopher's Stone
+            },
+            "Shield": None,
+        }
+        self.inventory = Inventory()  # Add an inventory instance
+
+    def equip_item(self, category, slot, item):
+        """Equip an item in the specified category and slot."""
+        if category in self.equipment_slots:
+            if isinstance(self.equipment_slots[category], dict):  # For sub-slots
+                if slot in self.equipment_slots[category]:
+                    self.equipment_slots[category][slot] = item
+                    print(f"Equipped {item} in {slot}.")
+                else:
+                    print(f"Invalid slot: {slot} for {category}.")
+            else:  # Single-slot categories
+                self.equipment_slots[category] = item
+                print(f"Equipped {item} in {category}.")
+        else:
+            print(f"Invalid category: {category}.")
+
+    def unequip_item(self, category, slot=None):
+        """Unequip an item from the specified category and slot."""
+        if category in self.equipment_slots:
+            if isinstance(self.equipment_slots[category], dict):  # For sub-slots
+                if slot in self.equipment_slots[category] and self.equipment_slots[category][slot]:
+                    removed_item = self.equipment_slots[category][slot]
+                    self.inventory.add_item(removed_item, category, level=1, rarity="Common")
+                    self.equipment_slots[category][slot] = None
+                    print(f"Unequipped {removed_item} from {slot}.")
+                else:
+                    print(f"No item equipped in {slot}.")
+            else:  # Single-slot categories
+                if self.equipment_slots[category]:
+                    removed_item = self.equipment_slots[category]
+                    self.inventory.add_item(removed_item, category, level=1, rarity="Common")
+                    self.equipment_slots[category] = None
+                    print(f"Unequipped {removed_item} from {category}.")
+                else:
+                    print(f"No item equipped in {category}.")
+        else:
+            print(f"Invalid category: {category}.")
+
+    def unequip_all(self):
+        """Unequip all items from all categories and slots."""
+        print("\nUnequipping all items...")
+        for category, slots in self.equipment_slots.items():
+            if isinstance(slots, dict):  # Sub-slots
+                for slot in slots:
+                    if slots[slot]:
+                        print(f"Unequipped {slots[slot]} from {slot}.")
+                        self.inventory.add_item(slots[slot], category, level=1, rarity="Common")
+                        slots[slot] = None
+            else:  # Single-slot
+                if self.equipment_slots[category]:
+                    print(f"Unequipped {self.equipment_slots[category]} from {category}.")
+                    self.inventory.add_item(self.equipment_slots[category], category, level=1, rarity="Common")
+                    self.equipment_slots[category] = None
+        print("All items have been unequipped.\n")
+
+    def display_equipment(self):
+        """Display the player's current equipment."""
+        print("\nCurrent Equipment:")
+        for category, slots in self.equipment_slots.items():
+            if isinstance(slots, dict):  # Sub-slots
+                print(f"  {category}:")
+                for slot, item in slots.items():
+                    print(f"    {slot}: {item if item else 'Empty'}")
+            else:  # Single-slot
+                print(f"  {category}: {slots if slots else 'Empty'}")
+        print("\n")
+
+
+# Example Usage
+player_equipment = EquipmentSystem()
+
+# Equip items
+player_equipment.equip_item("Weapon", None, "Sword of Destiny")
+player_equipment.equip_item("Armor", "Head", "Iron Helmet")
+player_equipment.equip_item("Armor", "Legs", "Steel Leggings")
+player_equipment.equip_item("Accessory", "Necklace", "Amulet of Wisdom")
+player_equipment.equip_item("Shield", None, "Golden Shield")
+
+# Display current equipment
+player_equipment.display_equipment()
+
+# Unequip all items
+player_equipment.unequip_all()
+
+# Sort and display inventory items
+player_equipment.inventory.display_items()
+player_equipment.inventory.sort_items("rarity")
+player_equipment.inventory.display_items()
