@@ -132,10 +132,10 @@ class EquipmentSystem:
 player_equipment = EquipmentSystem()
 
 # Equip items
-player_equipment.equip_item("Weapon", None, "Sword of Destiny")
+player_equipment.equip_item("Weapon", None, "Sword of Fire")
 player_equipment.equip_item("Armor", "Head", "Iron Helmet")
 player_equipment.equip_item("Armor", "Legs", "Steel Leggings")
-player_equipment.equip_item("Accessory", "Necklace", "Amulet of Wisdom")
+player_equipment.equip_item("Accessory", "Necklace", "Amulet of Fire")
 player_equipment.equip_item("Shield", None, "Golden Shield")
 
 # Display current equipment
